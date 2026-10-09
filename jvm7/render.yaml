@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: jvm-shyamali-portal
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JVM_SECURE_COOKIES
+        value: "true"

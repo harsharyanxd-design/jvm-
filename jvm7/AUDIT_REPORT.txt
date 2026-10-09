@@ -1,0 +1,35 @@
+JVM SHYAMALI WEBSITE — DEPLOYMENT REPAIR AUDIT
+Audit date: 9 October 2026
+
+ROOT CAUSE VERIFIED FROM SOURCE
+- The active v3 website sends relative /api requests to app_server.py, but that server defaults to 127.0.0.1 and stores records in private_data/school.sqlite3 on the machine running it. A static copy, file:// page, or another computer does not connect to that API or database.
+- The archived jvm_shyamali_portal.html is an earlier standalone page. Its saveStudentUpdate function writes to the browser-local key JVM_SHYAMALI_STUDENTS_STORE_V4, so those edits stay in that browser profile.
+- The active frontend already uses same-origin relative API routes; a production API URL or permissive CORS policy was not needed.
+
+REPAIRS IMPLEMENTED
+- Added DATABASE_URL support for managed PostgreSQL, while retaining SQLite for local use and adding JVM_DB_PATH for storage-path configuration.
+- Added PostgreSQL schema creation and a guarded SQLite-to-PostgreSQL migration. The migration opens SQLite read-only, refuses to merge into a non-empty destination, transfers account hashes and all existing record/audit/enquiry rows, transfers the private baseline, verifies counts, and commits as one transaction.
+- Added environment-driven PORT support, Docker deployment files, Render service configuration, secure-cookie configuration, a database health endpoint, and generic API failure responses.
+- Kept the server and frontend same-origin. Production images copy only runtime pages, public assets, and server code; they omit private seed files and the old standalone source.
+- Added a legacy browser export button. It exports only changed fields, removes credential fields, and is paired with an offline importer that creates a safety copy, checks IDs, merges only allowed changes, and records an audit event.
+- Added master-only create and delete APIs for student records and their linked student/parent accounts. Existing role-scoped reads and edits remain.
+- Updated deployment guidance, local-running notes, privacy notes, and the stale archive row counts.
+
+DATA SNAPSHOT INSPECTED
+- The supplied SQLite database contained 668 student records and 1,357 accounts (1 master, 20 teachers, 668 students, 668 parents), with zero audit and enquiry rows at inspection time.
+- The supplied database was not modified during verification.
+- The supplied project contains student and family information plus seed files with plaintext credentials. Keep the ZIP and working folder private. Confirm authorization and replace supplied/demo credentials before real school use.
+
+VERIFICATION RUN
+- Python syntax compilation passed for app_server.py and both migration utilities.
+- Local HTTP integration passed for health and all public page routes; legacy import, master-only create, duplicate rejection, scoped student/parent reads, denied student writes, edit, delete, cross-origin rejection, contact enquiry storage, and record persistence after restarting the server.
+- Browser export verification passed: only changed fields were exported, and identity/password fields were excluded.
+- Offline browser-import verification passed: a changed record was merged, baseline and audit data were written, record counts stayed unchanged, and the original SQLite source remained unchanged.
+- The integration suite used a temporary copy of the SQLite database. No test changes or test enquiries were written to the supplied database.
+
+NOT VERIFIED / REQUIRED BEFORE A PUBLIC LAUNCH
+- No Render account, private source repository, managed database URL, or school credentials were provided, so no public deployment or public URL was created.
+- PostgreSQL connectivity and the Render deployment have not been exercised against a real provider account. After setup, run the checklist in DEPLOYMENT_GUIDE.md.
+- A physical second-device check, a real browser-console review, school-authorized credential rotation, and production privacy approval remain deployment tasks.
+- Login sessions are held in process memory. Keep one web-service instance; restarts sign users out but do not remove PostgreSQL data.
+- Contact enquiries are saved but not emailed. Payment handling remains disabled. Optional AI services require separate server-side configuration.

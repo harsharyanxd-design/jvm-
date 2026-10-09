@@ -1,0 +1,15 @@
+CHANGES IN VERSION 3
+- Removed credentials.json (the server never read it) and faculty-source-records.json (it contained passwords AND was publicly downloadable). Logins come only from private_data/seed_*.json.
+- Classes: every class from Nursery to Class 12 now exists. Added Class 2, 3, 4, 6, 7 and Class 11 Humanities (35 sample students each, 668 students total) and extended teacher access to them.
+- Timetable: timetable.json holds a separate schedule for each of the 19 classes and each day Mon-Sat (assembly, 7 periods, two breaks, shorter Saturday - the common CBSE-school pattern). Regenerate with:  python generate_timetable.py
+  It is a SAMPLE allocation - confirm subjects/teachers with the school office.
+- Header: the top bar no longer disappears when scrolling or opening a section link; mobile menu and footer no longer cause sideways scrolling.
+- Faculty section (About & Campus page) and Campus Gallery. Put your own photos in images/gallery-1.jpg ... gallery-8.jpg.
+- New animated theme: moving gradient hero, floating shapes, scroll-reveal cards, count-up numbers, hover effects.
+- Chatbot: now answered by the server (/api/chat). It returns direct links (fees, timetable, calendar, admissions, faculty...). Signed-in faculty/admin can type a student's name and get a link that opens that dashboard. Public visitors never receive student data.
+- Real AI answers (optional): set an environment variable before starting the server:
+    Windows:  set ANTHROPIC_API_KEY=your_key   then  python app_server.py --port 8000
+    Mac/Linux: export ANTHROPIC_API_KEY=your_key
+  Or use a local model: install Ollama, then  set JVM_OLLAMA_MODEL=llama3.2
+  Without either, the bot still gives links and short built-in answers.
+- After editing index.html run:  python build_pages.py
